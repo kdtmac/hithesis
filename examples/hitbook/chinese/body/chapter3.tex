@@ -34,7 +34,7 @@
 格式为红外无人机图像和视频，通过脚本转换为图片格式后，
 标注目标框，制作成数据集，总共包含10000张图片，原始格式为PASCAL VOC，
 按训练、验证、测试分别有7000张、2000张、1000张。
-数据集中的原图示例如图所示。
+数据集中的原图示例如图\ref{dataset}所示。
 
 \begin{figure}[!h]
     \setlength{\subfigcapskip}{-1bp}
@@ -71,15 +71,22 @@
 
     \vspace{0.2em}
     \caption{数据集图像示例}
+    {\label{dataset}}
 \end{figure}
 
 
-\section{索引示例}[Index]
+\section{深度学习网络模型基本算法YOLOv5}
+本课题算法的主干网络模型采用YOLOv5网络，网络的结构如图\ref{yolo1}所示。
 
-为便于检索文中内容，可编制索引置于论文之后（根据需要决定是否设置）。索引以论文中
-的专业词语为检索线索，指出其相关内容的所在页码。索引用中、英两种文字书写，中文在
-前。\sindex[china]{qi!乔峰}\sindex[english]{Xu Zhu}\sindex[english]{Qiao Feng}
-中文按各词汉语拼音第一个字母排序，英文按该词第一个英文字母排序。
+\begin{figure}[h]
+    \centering
+    \includegraphics[width = 0.8\textwidth]{yolov5结构.jpg}
+    \caption{yolov5网络结构}
+    \label{yolo1}
+\end{figure}
+
+\subsection{YOLOv5网络结构}
+
 
 \section{术语排版举例}[Glossaries and index]
 
