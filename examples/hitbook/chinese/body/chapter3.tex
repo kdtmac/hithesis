@@ -76,7 +76,9 @@
 
 
 \section{深度学习网络模型基本算法YOLOv5}
-本课题算法的主干网络模型采用YOLOv5网络，网络的结构如图\ref{yolo1}所示。
+本课题算法的主干网络模型采用YOLOv5网络，网络的结构如图\ref{yolo1}所示，
+该模型按照推理流程顺序主要可以分成
+输入端、Backbone、Neck、Prediction这四个部分。
 
 \begin{figure}[h]
     \centering
@@ -85,8 +87,69 @@
     \label{yolo1}
 \end{figure}
 
-\subsection{YOLOv5网络结构}
+\subsection{输入端}
+YOLOv5网络的输入端就是输入图像的模块，
+既可以向网络提供原始的图像输入，
+也可以在这个部分对图像进行预处理
+和数据增强，
+此外还能进行算法的准备工作，比如锚框的
+自适应计算等。
 
+\subsection{Backbone}
+Backbone的主要作用是初步提取特征图。其中典型的模块是Focus模块、CBL模块以及CSP模块。
+
+\subsubsection{Focus模块}
+Focus模块在YOLOv5中是图片进入backbone前，对图片进行切片操作，
+具体操作是在一张图片中每隔一个像素拿到一个值，类似于邻近下采样，
+这样就拿到了四张图片，四张图片互补，长的差不多，但是没有信息丢失，
+这样一来，将W、H信息就集中到了通道空间，输入通道扩充了4倍，
+即拼接起来的图片相对于原先的RGB三通道模式变成了12个通道，
+最后将得到的新图片再经过卷积操作，最终得到了没有信息丢失情况下的二倍下采样特征图。
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width = 0.8\textwidth]{focus.png}
+  \caption{Focus切片示意图}
+  \label{focus}
+\end{figure}
+
+\subsubsection{CBL模块}
+CBL模块是卷积神经网络的基本组成模式，
+结构如图\ref{cbl}所示，
+由卷积、归一化、激活函数三个部分组成。
+CBL的主要作用是通过卷积采集特征。
+其中的激活函数默认是Leaky ReLU，Leaky Rectified Linear Unit是一种基于 ReLU 的激活函数，但它对于负值的斜率很小，而不是平缓的斜率。 斜率系数是在训练之前确定的，即它不是在训练期间学习的。 这种类型的激活函数在我们可能遭受稀疏梯度的任务中很受欢迎。
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width = 0.8\textwidth]{CBL.png}
+  \caption{CBL模块组成示意图}
+  \label{cbl}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width = 0.5\textwidth]{leakyrelu.png}
+  \caption{Leaky ReLU示意图}
+  \label{relu}
+\end{figure}
+
+\subsubsection{CSP模块}
+SP结构从网络结构设计的角度来解决以往工作在推理过程中需要很大计算量的问题，CSP结构认为推理计算过高的问题是由于网络优化中的梯度信息重复导致的。CSP结构通过将基础层的特征图划分为两个部分，然后通过CSP结构将它们合并，可以在能够实现更丰富的梯度组合的同时减少计算量。
+Yolov5使用CSPDarknet作为Backbone，从输入图像中提取丰富的信息特征。CSPNet解决了其他大型卷积神经网络框架Backbone中网络优化的梯度信息重复问题，将梯度的变化从头到尾地集成到特征图中，因此减少了模型的参数量和FLOPS数值，既保证了推理速度和准确率，又减小了模型尺寸。
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width = 0.8\textwidth]{CSP.png}
+  \caption{CSP模块组成示意图}
+  \label{csp}
+\end{figure}
+
+\subsection{Neck}
+YOLOv5网络结构主要可以分成输入端、Backbone、Neck、Prediction这四个部分。
+
+\subsection{输入端}
+YOLOv5网络结构主要可以分成输入端、Backbone、Neck、Prediction这四个部分。
 
 \section{术语排版举例}[Glossaries and index]
 
