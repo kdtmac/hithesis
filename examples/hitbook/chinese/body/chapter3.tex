@@ -210,16 +210,163 @@ Prediction部分包含上级输出的特征向量，并通过输入的特征向�
 
 （1）计算像素区间在$[0,L-1]$的图像灰度为：
 \begin{equation}
-  \mathrm{p}_{r}\left(r_{k}\right)=\frac{n_{k}}{n} \quad \mathrm{k}=0,1,2 \ldots, L-1
+  \mathrm{p}_{r}\left(r_{k}\right)=\frac{n_{k}}{n} \quad k=0,1,2, \ldots, L-1
 \end{equation}
 
 其中$n$代表图像的像素总数，$n_{k}$代表灰度级为$r_{k}$的像素个数。
 
-（2）计算
+（2）计算像素变换后的分布：
+\begin{equation}
+  \mathrm{s}_{k}=T\left(r_{k}\right)=\sum_{j=0}^{k} p_{r}\left(r_{j}\right)=\sum_{j=0}^{k} \frac{n_{j}}{n} \quad k=0,1,2, \ldots L-1
+  \label{pix trans}
+\end{equation}
 
+通过式\ref{pix trans}可将图像中值为$r_{k}$的像素点映射到输出图像中值为$s_{k}$的点，此时$s_{k}$的像素值在$[0,1]$之间。
 
+（2）将$s_{k}$转化为与原始图像灰度级一致：
+\begin{equation}
+  s_{k}=s_{k} *(L-1)
+\end{equation}
 
+直方图均衡对于太暗或太亮的图片都有很好的提高对比度效果，并且计算量不大，但该方法存在的局限在于变换后的图像灰度级会减少，造成细节信息的损失，严重的可能造成原本图像中的小目标丢失，后来针对以上问题发展出自适应直方图均衡(AHE)，对比度受限的直方图均衡(CLAHE)等。
 
+\subsubsection{USM锐化}
+对于大多数情况下的目标检测任务，目标相对背景都是有较明显的轮廓，因此可以采用锐化处理方法进一步加强物体的边界，进而增强检测效果。
+
+锐化的本质是对原图像实现高通滤波，得到原图像的高频分量，也就是对原图像中的边缘部分进行了增强。图像处理实现锐化有一种常用的算法USM（Unsharp Mask），这种锐化的方法就是对原图像先做一个高斯模糊取得原图像的低通分量，然后用原来的图像减去一个系数乘以高斯模糊之后的图像，然后再把值Scale到$[0,255]$的RGB像素值范围之内。基于USM锐化的方法可以去除一些细小的干扰细节和噪声，比一般直接使用卷积锐化算子得到的图像锐化结果更加可靠。
+\begin{equation}
+  I_{sharpend}=I_{original}+(I_{original}-I_{blurred})*a
+\end{equation}
+
+式中$I_{sharpend}$表示锐化后的图像，$I_{original}$表示原始图像，$I_{blurred}$表示模糊后的原始图像，$a$表示权重系数。
+
+\subsection{通道填充算法}
+如前文所述，红外图像由于信噪比低等特点因此相对可见光图像来说信息量
+少。本章针对红外图像的特点，结合前文介绍的图像增强手段，提出了一种基于
+通道填充的红外图像数据增强算法，该算法的主要思想为：由于红外图像为单通
+道图像，携带的信息量有限，选择另外两种红外图像增强方法将单通道的红外图像填充成
+三通道，再输入到网络中，增加数据量的同时使网络能够学到更丰富的特征。算
+法的流程如图所示。
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width = 0.8\textwidth]{通道填充流程图.png}
+  \caption{通道填充算法流程图}
+  \label{tdtc}
+\end{figure}
+
+首先将输入的图像分别进行两次图像增强处理，然后将增强后的图像与原图
+进行融合，融合成三通道图片，由于不能准确知道哪些增强方法会使检测结果提
+高，因此采取多种增强方法进行对比实验，包括以下方法：
+
+（1）Inversion。主要目的在于网络初始化权重为在可见光图像进行预训练
+后的权重，因此将红外图像进行 inversion 处理后，能够更接近可见光图像的灰
+度图，从而达到提升检测效果的目的。
+
+（2）CLAHE。与直方图均衡相似，只是处理的区域由原图变得更细，增强
+对比度的同时，能够抑制噪声。CLAHE窗口大小选择 3*3。
+
+（3）USM变换。主要目的在于抑制噪声的同时进行图像的锐化，强化目标的边缘。本文使用高斯模糊后的USM变换进行锐化。
+
+\begin{figure}[!h]
+  \setlength{\subfigcapskip}{-1bp}
+
+  \centering
+  \begin{minipage}{\textwidth}
+  \centering
+  \subfigure{\label{tdtc11}}\addtocounter{subfigure}{-2}
+  \subfigure{\subfigure[正常目标示例~1]{\includegraphics[width=0.4\textwidth]{1.png}}}
+  \hspace{2em}
+  \subfigure{\label{tdtc12}}\addtocounter{subfigure}{-2}
+  \subfigure{\subfigure[正常目标示例~2]{\includegraphics[width=0.4\textwidth]{2.png}}}
+  \end{minipage}
+
+  \centering
+  \begin{minipage}{\textwidth}
+  \centering
+  \subfigure{\label{tdtc21}}\addtocounter{subfigure}{-2}
+  \subfigure{\subfigure[小目标示例~1]{\includegraphics[width=0.4\textwidth]{5.png}}}
+  \hspace{2em}
+  \subfigure{\label{tdtc22}}\addtocounter{subfigure}{-2}
+  \subfigure{\subfigure[小目标示例~2]{\includegraphics[width=0.4\textwidth]{6.png}}}
+  \end{minipage}
+
+  \centering
+  \begin{minipage}{\textwidth}
+  \centering
+  \subfigure{\label{tdtc31}}\addtocounter{subfigure}{-2}
+  \subfigure{\subfigure[遮挡目标示例~1]{\includegraphics[width=0.4\textwidth]{3.png}}}
+  \hspace{2em}
+  \subfigure{\label{tdtc32}}\addtocounter{subfigure}{-2}
+  \subfigure{\subfigure[遮挡目标示例~2]{\includegraphics[width=0.4\textwidth]{4.png}}}
+  \end{minipage}
+
+  \centering
+  \begin{minipage}{\textwidth}
+  \centering
+  \subfigure{\label{tdtc41}}\addtocounter{subfigure}{-2}
+  \subfigure{\subfigure[遮挡目标示例~1]{\includegraphics[width=0.4\textwidth]{3.png}}}
+  \hspace{2em}
+  \subfigure{\label{tdtc42}}\addtocounter{subfigure}{-2}
+  \subfigure{\subfigure[遮挡目标示例~2]{\includegraphics[width=0.4\textwidth]{4.png}}}
+  \end{minipage}
+
+  \vspace{0.2em}
+  \caption{数据集图像示例}
+  {\label{tdtc2}}
+\end{figure}
+
+增强后的图片效果如图\ref{tdtc2}所示，其中\ref{tdtc11}和\ref{tdtc12}表示原图像，\ref{tdtc21}和\ref{tdtc22}表示原图经过Inversion处理后的图像，\ref{tdtc31}和\ref{tdtc32}表示原图像经过CLAHE处理后的图像，\ref{tdtc41}和\ref{tdtc42}表示原图像经过USM处理后的图像。
+
+\subsection{图像拼接算法}
+由于在红外无人机目标检测的场景下，小尺度目标（面积占整个图像总面积比例较小）的数量占比较大，因此考虑采用一种图像拼接的数据增强算法，将训练数据中的小目标增多，从而增强网络对小目标的检测能力。
+
+该算法的实现方法是，从训练集中随机抽取4个图像，将这4张图像进行拼接后生成一张与原始图像相同大小的新图像输入网络。
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width = 0.8\textwidth]{通道填充流程图.png}
+  \caption{图像拼接示意图}
+  \label{txpj}
+\end{figure}
+
+\section{改进损失函数}
+YOLOv5的损失函数由三部分组成：第一部分是bounding box损失，主要根据预测目标框和真值目标框的重合程度进行计算。第二部分是置信度损失，第三部分是分类误差。
+
+其中对于bounding box的损失函数主要是基于IoU（交并比，Intersection over Union）进行计算。IoU一般表示预测框与真值框面积的交并比，即二者相交的面积除以二者所占的总面积。
+\begin{equation}
+  I o U=\frac{|A \cap B|}{|A \cup B|}
+\end{equation}
+
+这样一种计算方式相对于之前的基于点到点之间距离的MSE损失函数已经有较大的优势，主要体现在：
+
+（1）MSE损失函数由于是按点距离计算，因此对于任务目标的尺寸变化较为敏感，尺寸变化往往会引起损失函数的无意义波动。
+
+（2）MSE损失函数从点距离出发，忽略了目标框各点之间的关联。因此基于IoU的损失函数已经在一定程度上反映了预测框与真值框之间的误差关系。
+
+而IoU损失函数有两个重要特性，使得它能作为很多计算机视觉算法的损失函数。
+
+（1）$\mathcal{L}=1-IoU$满足非负性、同一性、对称性、三角不等性等所有损失函数的特性。
+
+（2）IoU相对于问题的规模是不变的。这意味着两个任意形状之间的相似性独立于它们的空间规模。
+
+然而基于IoU的损失函数也存在一定的问题。
+
+（1）当预测框与真值框没有相交区域时，IoU值为0，此时损失loss为0，无法进行梯度回传，也就是无法进行模型训练。
+
+（2）IoU还是无法精确地衡量预测框与真值框之间的误差情况，尤其是在IoU为0时，预测框与真实框之间的距离变得无法量化。
+
+因此，针对IoU的这一问题，为了增强算法对红外无人机目标检测任务中的目标框定位能力，可以引入一种更加完善的GIoU损失函数。设$I o U=\frac{\mathcal{I}}{\mathcal{U}}$
+，其中$\mathcal{I}$表示预测框与真值框相交部分面积，$\mathcal{U}$表示预测框与真值框合并部分面积，则GIoU的计算公式是：
+\begin{equation}
+  G I o U=I o U-\frac{A^{c}-\mathcal{U}}{A^{c}}
+\end{equation}
+
+其中$A^{c}$表示预测框和真值框的最小闭包区域的面积。
+
+GIoU的计算流程是：
+
+（1）
 
 
 
