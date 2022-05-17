@@ -122,14 +122,14 @@ CBL的主要作用是通过卷积采集特征。
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width = 0.8\textwidth]{CBL.png}
+  \includegraphics[width = 0.5\textwidth]{CBL.png}
   \caption{CBL模块组成示意图}
   \label{cbl}
 \end{figure}
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width = 0.5\textwidth]{leakyrelu.png}
+  \includegraphics[width = 0.4\textwidth]{leakyrelu.png}
   \caption{Leaky ReLU示意图}
   \label{relu}
 \end{figure}
@@ -179,12 +179,16 @@ Prediction部分包含上级输出的特征向量，并通过输入的特征向�
   \toprule
   检测算法 & mAP & 推理时间\\
   \midrule
-   5 & 269.8 & 0.000674\\
-  10 & 421.0 & 0.001035\\
-  20 & 640.2 & 0.001565\\
+  YOLOv3 & 269.8 & 0.000674\\
+  Faster-RCNN & 421.0 & 0.001035\\
+  SSD & 640.2 & 0.001565\\
+  YOLOv5 & 640.2 & 0.001565\\
   \bottomrule
   \end{tabular}
+  \label{t1}
 \end{table}
+
+根据表ref{t1}中的实验结果，Faster-RCNN相对于YOLOv3的检测精度更高，但是同时会消耗更多的推理时间。这是因为Faster-RCNN算法虽然相对于RCNN算法有所改进，但是仍然采用二阶段检测方式，先进行提名候选框后进行目标检测，这种检测方式虽然保证了检测精度，但是会使得算法总体的检测耗时较长。而YOLOv3的检测速度较快，这是由于YOLO系列算法直接采用了单阶段检测，较大程度地减少了推理时间，但是由于网络结构中没有充分利用多尺度特征信息，因此在尺度变化较大的数据集上精度不高。而SSD算法在单阶段检测的同时，引入了特征金字塔结构，充分利用了多尺度目标的特征，因而能在检测精度和推理时间上都有较好的表现。而YOLOv5网络在YOLOv3的基础上，应用了很多提升精度的改进，如增加了PANet、改进了损失函数等，也应用了很多提升速度的改进，如应用了CSP模块等，因此在实验结果中体现出YOLOv5的检测精度和推理时间都是最优的，因此本文选择YOLOv5算法作为红外无人机目标检测算法的基础。
 
 \section{数据增强算法}
 由于深度学习算法通常需要大量的数据进行学习，因此在原始数据集的基础上，将基础网络结合数据增强算法能在一定程度上提升算法的性能。因此本节将对常见的图像增强算法进行实验，在实验结果的基础上针对红外图像目标检测任务提出一种图像填充算法，此外还将针对红外无人机目标检测任务中的小目标占比较高的特性提出一种图像拼接的数据增强算法。
@@ -250,7 +254,7 @@ Prediction部分包含上级输出的特征向量，并通过输入的特征向�
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width = 0.8\textwidth]{通道填充流程图.png}
+  \includegraphics[width = 0.5\textwidth]{通道填充流程图.png}
   \caption{通道填充算法流程图}
   \label{tdtc}
 \end{figure}
