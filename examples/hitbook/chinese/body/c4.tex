@@ -42,14 +42,34 @@ Ghost 模块是一种替代传统CNN中的卷积操作并且获得更快速度�
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width = 0.8\textwidth]{ghost算法实现.png}
+    \includegraphics[width = 0.6\textwidth]{ghost算法实现.png}
     \caption{ghost算法实现示意图}
     \label{ghost2}
 \end{figure}
 
 本课题的Ghost实现流程如图\ref{ghost2}所示，将原始卷积层改变成两部分，分别产生相当于原始卷积层一半通道数的输出（实际上二者的输出比例可以任意调节），可以使得改进后的模块参数量减少。
 
+\begin{figure}[htbp]
+	\centering
+	\begin{minipage}{0.49\linewidth}
+		\centering
+		\includegraphics[width=0.9\linewidth]{convfmap.PNG}
+		\caption{普通卷积特征图}
+		\label{convf}%文中引用该图片代号
+	\end{minipage}
+	%\qquad
+	\begin{minipage}{0.49\linewidth}
+		\centering
+		\includegraphics[width=0.9\linewidth]{ghostfmap.PNG}
+		\caption{ghost卷积特征图}
+		\label{ghostf}%文中引用该图片代号
+	\end{minipage}
+\end{figure}
+
+普通卷积和ghost卷积产生的特征图如图\ref{convf}和图\ref{ghostf}所示，从图中可以看出，由于ghost卷积相当于对普通卷积进行了一定程度的转化，所以ghost卷积产生的特征图和普通卷积产生的特征图存在一定的差别,不过图\ref{convf}和图\ref{ghostf}中确实有相当大比例的对应位置特征图是相似的，这也验证了上文的理论分析。此外，由于ghost卷积减少了网络结构中的参数，所以在简化运算、加速推理的同时，各特征图之间的差异更小，也就是ghost卷积产生的特征图在一定程度上丢失了多样性，也将导致整个网络失去一些特征，降低最终目标检测的精度。
+
 \subsection{ghost算法理论分析}
+对于特定的网络结构，在将传统卷积模块替换成ghost卷积模块之后，可以对网络模型的参数数量和推理速度进行理论计算，得出改进后网络相对于原网络的推理加速比和参数压缩比。
 
 （1）相对于普通卷积模块的加速比
 
@@ -75,14 +95,56 @@ Ghost 模块是一种替代传统CNN中的卷积操作并且获得更快速度�
 如式\ref{csys}所示，经过计算可以得到改进后的ghost模块和改进之前的普通卷积模块理论参数压缩比为2。
 
 \subsection{ghost算法实验对比分析}
-将ghost模块对应改动部署到YOLOv5网络之后，在实验平台上进行测试验证。分别用YOLOv5模块和调整深度之后得到的小型网络（记为YOLOv5s）作为参照，验证YOLOv5+ghost在红外无人机图像数据集上的效果。
+将ghost模块对应改动部署到YOLOv5网络之后，在实验平台上进行测试验证。分别用YOLOv5网络模型和调整深度之后得到的小型网络（记为YOLOv5s）作为参照，验证YOLOv5+ghost在红外无人机图像数据集上的效果。
 
 \section{轻量化红外无人机目标检测算法嵌入式实现与验证}
 为了进一步验证本文提出的轻量化红外无人机目标检测算法的有效性，本节将本文提出的完整算法模型进行转换，并且在嵌入式设备上进行检测和验证。
 
 \subsection{嵌入式设备介绍}
+为了满足实际检测任务的需要，本章将本文提到的算法在常用于深度的嵌入式设备 NVIDIA
+Jetson AGX Xavier 上进行算法测试，验证算法在实际使用中是否能达到实时性要求。
+NVIDIA Jetson AGX Xavier 开发板是英伟达公司推出的嵌入式 AI 超级计算平台，可以
+部署在无人机或机器人等诸多终端上，解决移动终端算力不足的局限。NVIDIA
+Jetson TX2 采用 Tegra 处理器，内存为 8GB，采用了全新 Pascal 架构 GPU 核心，
+更加适合进行一些基于深度学习的计算机视觉任务的开发，具体参数如表 5.1 所
+示。NVIDIA Jetson AGX Xavier 具有 MAX Q 和 MAX P 两种运行模式，由于其体型小巧，
+性能高效，因此应用场景广泛，如无人机和智能机器人等相关的智能机器领域，
+安防和智慧城市等领域。NVIDIA Jetson AGX Xavier 平台出厂自带 Ubuntu 16.04 操作系
+统，支持 NVIDIA Jetpack SDK，包括深度学习库、计算机视觉、GPU 计算等功
+能，支持下载安装所有台式机所能安装的软件如 Python、Pytorch、TensorFlow
+等，轻松配置台式机一样的运行环境。NVIDIA Jetson AGX Xavier 有非常多功能的接口，
+比如可以使用 HDMI 接口连接显示器，使用 USB3.0 接口连接摄像头进行实时获
+取视频数据用来进行检测或跟踪任务。NVIDIA Jetson AGX Xavier 嵌入式开发平台如图
+5.1 所示。近年来由于 TX2 嵌入式平台外形小巧便于集成到各种终端产品中，嵌
+入式智能计算平台发展迅猛，但经过实际测试表明嵌入式设备因为 CPU 和 GPU
+计算能力与台式机相比仍具有一定差距，TX2 与台式机在相同参数情况下进行相
+同的实验时，二者 GPU 运算效率相差将近 10 倍。由于人工智能的兴起，未来嵌
+入式设备会向着更加小型化、功耗更低、运行速度更快的方向发展。
+
+\begin{table}[htbp]
+    \caption{不同算法对红外无人机数据集的检测结果}
+    \vspace{0.5em}\centering\wuhao
+    \begin{tabular}{cc}
+    \toprule
+    项目 & 规格\\
+    \midrule
+    GPU & 512核 NVIDIA Volta GPU，64 Tensor核\\
+    CPU & 8核 ARM v8.2 64-bit CPU, 8MB L2 + 4MB L3\\
+    DL Accelerator & 2x NVDLA\\
+    Vision Accelerator & 2x PVA\\
+    Memory & 32GB 256-bit LPDDR4x\\
+    Storage & 32GB eMMC 5.1\\
+    CSI Camera & 16 lanes MIPI CSI-2\\
+    PCIe & x16 connector with x8 PCIe Gen4 or x8 SLVS-EC\\
+    Networking & RJ45 (Gigabit Ethernet)\\
+    尺寸 & 105mm x 105mm x 65mm\\
+    \bottomrule
+    \end{tabular}
+    \label{t1}
+\end{table}
 
 \subsection{tensorrt加速}
+
 
 \subsection{不同算法性能对比与分析}
 
