@@ -85,7 +85,7 @@ LASSO 回归方式选择剪枝通道并进行逐层剪枝［14］；SFP 采
 常见的轻量网络模型有SqueezeNet、Xception、MobileNet、ShuffleNet等。每种网络都提出了一种或几种特殊结构用来减少模型的参数量或者提升模型的推理速度。
 
 （1）SqueezeNet
-
+SqueezeNet的主要策略是用$1x1$的卷积代替部分$3x3$的卷积运算，这使得卷积的参数数量减少了9倍。
 
 
 
@@ -226,7 +226,7 @@ Jetson TX2 采用 Tegra 处理器，内存为 8GB，采用了全新 Pascal 架�
 \end{table}
 
 \subsection{tensorrt加速}
-https://github.com/wang-xinyu/tensorrtx/blob/master/tutorials/from_pytorch_to_trt_stepbystep_hrnet.md
+% https://github.com/wang-xinyu/tensorrtx/blob/master/tutorials/from_pytorch_to_trt_stepbystep_hrnet.md
 
 \subsection{不同算法性能对比与分析}
 
