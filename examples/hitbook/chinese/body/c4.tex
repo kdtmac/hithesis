@@ -135,9 +135,9 @@ MobileNet模型基于深度可分离卷积搭建，这是分解卷积的一种�
 MobileNet通过使用$3\times3$的深度可分离卷积，相对于标准卷积而言计算量减少了8-9倍。
 
 \section{基于ghost卷积的网络结构轻量化}
-Ghost 模块是一种替代传统CNN中的卷积操作并且获得更快速度和更小模型体积的方案。通过对比分析ResNet-50网络第一个残差组（Residual group）输出的特征图可视化结果，发现一些特征图高度相似。如果按照传统的思考方式，可能认为这些相似的特征图存在冗余，是多余信息，想办法避免产生这些高度相似的特征图。而ghost模块另辟蹊径，选择以一种更简单的操作来生成相同数量的特征图，从而实现更快速高效的检测。
+ghost 模块是一种替代传统CNN中的卷积操作并且获得更快速度和更小模型体积的方案。通过对比分析ResNet-50网络第一个残差组（Residual group）输出的特征图可视化结果，发现一些特征图高度相似。如果按照传统的思考方式，可能认为这些相似的特征图存在冗余，是多余信息，想办法避免产生这些高度相似的特征图。而ghost模块另辟蹊径，选择以一种更简单的操作来生成相同数量的特征图，从而实现更快速高效的检测。
 
-\subsection{Ghost模块思想}
+\subsection{ghost模块思想}
 典型的卷积计算过程如图\ref{conv}所示，所有的输入逐一经过卷积运算后生成新的特征图。这里的每一个输出张量都是一个由卷积核运算产生的特征图。但是这些特征图中可能有些特征图相似度较高，因此可以认为两张或几张比较相似的特征图是产生于几次同样代价的卷积是一种浪费。
 
 \begin{figure}[htbp]
@@ -174,7 +174,22 @@ Ghost 模块是一种替代传统CNN中的卷积操作并且获得更快速度�
     \label{ghost2}
 \end{figure}
 
-本课题的Ghost实现流程如图\ref{ghost2}所示，将原始卷积层改变成两部分，分别产生相当于原始卷积层一半通道数的输出（实际上二者的输出比例可以任意调节），可以使得改进后的模块参数量减少。
+本课题的ghost实现流程如图\ref{ghost2}所示，将原始卷积层改变成两部分，分别产生相当于原始卷积层一半通道数的输出（实际上二者的输出比例可以任意调节），可以使得改进后的模块参数量减少。
+
+具体地，本文在实现ghost模块时采用的简单线性变换是分组卷积。图\ref{convp}表示了普通卷积模块的卷积过程,而图\ref{ghostp}表示本文实现的ghost模块的卷积过程。从图\ref{convp}中可以看出，普通卷积的一个卷积核对应一个输出通道，每个卷积核和所有输入通道进行运算；而在图\ref{ghostp}中，首先对输入通道$C1$应用普通卷积，产生$\frac{C2}{2}$个输出特征图，此后应用分组个数为$\frac{C2}{2}$的分组卷积，每个分组内的卷积核不与组外的输入特征图进行运算，分组卷积再产生$\frac{C2}{2}$个输出特征图，因此可以实现ghost模块的输出特征图和普通卷积的输出特征图维度相同。
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width = 0.8\textwidth]{普通卷积过程.png}
+    \caption{普通卷积实现示意图}
+    \label{convp}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width = 0.8\textwidth]{ghost卷积过程.png}
+    \caption{ghost卷积实现示意图}
+    \label{ghostp}
+\end{figure}
 
 \begin{figure}[htbp]
 	\centering
@@ -270,9 +285,25 @@ Jetson TX2 采用 Tegra 处理器，内存为 8GB，采用了全新 Pascal 架�
     \label{t1}
 \end{table}
 
-\subsection{tensorrt加速}
-% https://github.com/wang-xinyu/tensorrtx/blob/master/tutorials/from_pytorch_to_trt_stepbystep_hrnet.md
+\subsection{ONNX框架}
+现如今，各大主流深度学习框架都有着自己独有的特点与魅力，吸引着广大科研与开发人员，例如：
+（1）Caffe2：方便机器学习算法和模型大规模部署在移动设备。
 
-\subsection{不同算法性能对比与分析}
+（2）PyTorch：PyTorch是一个快速便于实验深度学习框架。但是由于其高度封装，导致部分function不够灵活。
+
+（3）TensorFlow：TensorFlow 是一个开放源代码软件库，是很多主流框架的基础或者依赖。几乎能满足所有机器学习开发的功能，但是也有由于其功能代码过于底层，学习成本高，代码冗繁，编程逻辑与常规不同等缺点。
+
+此外还有：Cognitive Toolkit (CNTK)，Apache MXNet，Chainer，Apple CoreML，SciKit-Learn，ML.NET
+
+深度学习算法大多通过计算数据流图来完成神经网络的深度学习过程。 一些框架（例如CNTK，Caffe2，Theano和TensorFlow）使用静态图形，而其他框架（例如PyTorch和Chainer）使用动态图形。 但是这些框架都提供了接口，使开发人员可以轻松构建计算图和运行时，以优化的方式处理图。 这些图用作中间表示（IR），捕获开发人员源代码的特定意图，有助于优化和转换在特定设备（CPU，GPU，FPGA等）上运行。
+
+对于本课题的红外无人机目标检测的任务场景，模型的移动设备部署需要借助tensorrt模型来进行实现，这时候如果把整个模型再重新采用tensorrt进行搭建和训练，无疑是消耗大量的时间和精力。这时就可以用ONNX这样的中间框架来进行已训练模型的转换。
+
+开放式神经网络交换（ONNX）是迈向开放式生态系统的第一步，它使AI开发人员能够随着项目的发展选择合适的工具。 ONNX为AI模型提供开源格式。 它定义了可扩展的计算图模型，以及内置运算符和标准数据类型的定义。 最初的ONNX专注于推理（评估）所需的功能。 ONNX解释计算图的可移植，它使用graph的序列化格式。 它不一定是框架选择在内部使用和操作计算的形式。 例如，如果在优化过程中操作更有效，则实现可以在存储器中以不同方式表示模型。
+
+\subsection{tensorrt框架}
+TensorRT 是 NVIDIA 推出的一个高性能的深度学习推理框架，可以让深度学习模型在 NVIDIA GPU 上实现低延迟，高吞吐量的部署。TensorRT 支持 Caffe，TensorFlow，Mxnet，Pytorch 等主流深度学习框架。TensorRT 是一个 C++ 库，并且提供了 C++ API 和 Python API，主要在 NVIDIA GPU 进行高性能的推理 (Inference) 加速。
+
+\subsection{嵌入式平台算法实现及分析}
 
 
