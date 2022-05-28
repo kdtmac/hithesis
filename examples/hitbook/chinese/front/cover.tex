@@ -30,7 +30,7 @@
   % cassosupervisor={某某某教授}, % 副指导老师
   % ccosupervisor={某某某教授}, % 联合指导老师
   % 日期自动使用当前时间，若需指定按如下方式修改：
-  %cdate={超新星纪元},
+  cdate={2022年6月},
   cstudentid={20S005075},
   cstudenttype={硕士学位论文}, %非全日制教育申请学位者
   cnumber={no9527}, %编号
@@ -51,46 +51,30 @@
   exueke={Engineering},
   esubject={Computer Science and Technology},
   eaffil={\emultiline[t]{School of Mechatronics Engineering \\ Mechatronics Engineering}},
-  eauthor={Yu Dongmei},
+  eauthor={Chen YiFei},
   esupervisor={Professor XXX},
   eassosupervisor={XXX},
   % 日期自动生成，若需指定按如下方式修改：
-  edate={December, 2017},
+  edate={June, 2022},
   estudenttype={Master of Art},
   %
   % 关键词用“英文逗号”分割
-  ckeywords={\TeX, \LaTeX, CJK, 嗨！, thesis},
-  ekeywords={\TeX, \LaTeX, CJK, template, thesis},
+  ckeywords={红外目标检测, YOLOv5, 轻量化},
+  ekeywords={Infrared object detection, YOLOv5, Model compression},
 }
 
 \begin{cabstract}
+近年来随着无人机市场和技术的发展，对无人机目标的检测和打击成为了安全领域的重要任务。而红外成像相对于可见光成像有受天气影响小等优势，因此红外图像的目标检测是目标检测中的一个重要方向。目标检测是对输入图像进行相应处理后得出图像中待测目标的位置和类别的一种任务。本文研究提出了一种基于深度学习的红外图像无人机目标检测算法。
 
-摘要的字数（以汉字计），硕士学位论文一般为500 $\sim$ 1000字，博士学位论文为1000 $\sim$ 2000字，
-均以能将规定内容阐述清楚为原则，文字要精练，段落衔接要流畅。摘要页不需写出论文题目。
-英文摘要与中文摘要的内容应完全一致，在语法、用词上应准确无误，语言简练通顺。
-留学生的英文版博士学位论文中应有不少于3000字的“详细中文摘要”。
+本文研究分析了红外图像无人机检测任务中的几个难点，并且提出了具有针对性的解决方案。首先本文选择了目标检测任务中表现较好的深度学习算法YOLOv5并且和其他常用算法进行了对比，实验结果表明YOLOv5算法在红外无人机检测任务中相比其他已有算法性能较强。针对红外图像开源数据集较少的问题，本文自行制作了红外无人机目标数据集。针对红外图像目标边缘模糊、分辨率低、信息量小等特点，本文设计了一种通道填充的数据增强算法，提升了算法的性能。针对无人机检测任务中小目标多的问题，本文设计了一种图像拼接的数据增强算法，提升了算法对小目标的检测能力，从而提升了算法在红外无人机数据集上的检测精度。针对小目标较多造成的算法定位不准的问题，本文改进了YOLOv5算法的目标框定位损失函数，提升了算法在红外无人机数据集上的检测精度。针对实际检测任务中的实时处理需求，本文设计了一种轻量化算法并且在嵌入式设备上进行了验证，结果表明本文提出的轻量化红外无人机目标检测算法能在嵌入式设备上基本上达到实时处理的要求。
 
-  关键词是为了文献标引工作、用以表示全文主要内容信息的单词或术语。关键词不超过 5
-  个，每个关键词中间用分号分隔。（模板作者注：关键词分隔符不用考虑，模板会自动处
-  理。英文关键词同理。）
+综上，本文提出了一种基于深度学习的红外无人机目标检测算法，在红外无人机数据集上相对已有算法能取得更高的检测精度，该算法的轻量化版本在嵌入式设备上验证结果表示，算法基本可以实现实时运行。
 \end{cabstract}
 
 \begin{eabstract}
-   An abstract of a dissertation is a summary and extraction of research work
-   and contributions. Included in an abstract should be description of research
-   topic and research objective, brief introduction to methodology and research
-   process, and summarization of conclusion and contributions of the
-   research. An abstract should be characterized by independence and clarity and
-   carry identical information with the dissertation. It should be such that the
-   general idea and major contributions of the dissertation are conveyed without
-   reading the dissertation.
+  In recent years, with the development of the UAV market and technology, the detection and attack of UAV targets has become an important task in the security field. Compared with visible light imaging, infrared imaging has the advantage of being less affected by weather, so the target detection of infrared images is an important direction in target detection. Object detection is a task of obtaining the position and category of the object to be detected in the image after corresponding processing of the input image. In this paper, a deep learning-based infrared image UAV target detection algorithm is proposed.
 
-   An abstract should be concise and to the point. It is a misunderstanding to
-   make an abstract an outline of the dissertation and words ``the first
-   chapter'', ``the second chapter'' and the like should be avoided in the
-   abstract.
-
-   Key words are terms used in a dissertation for indexing, reflecting core
-   information of the dissertation. An abstract may contain a maximum of 5 key
-   words, with semi-colons used in between to separate one another.
+  This paper studies and analyzes several difficulties in the infrared image UAV detection task, and proposes targeted solutions. First of all, this paper selects the deep learning algorithm YOLOv5, which performs better in the target detection task, and compares it with other commonly used algorithms. The experimental results show that the YOLOv5 algorithm has better performance than other existing algorithms in the infrared UAV detection task. Aiming at the problem that there are few open source datasets of infrared images, this paper produced an infrared UAV target dataset by itself. Aiming at the characteristics of infrared image target edge blur, low resolution and small amount of information, this paper designs a data enhancement algorithm for channel filling, which improves the performance of the algorithm. Aiming at the problem of many small targets in the UAV detection task, this paper designs a data enhancement algorithm for image stitching, which improves the algorithm's ability to detect small targets, thereby improving the detection accuracy of the algorithm on the infrared UAV dataset. Aiming at the problem of inaccurate positioning of the algorithm caused by many small targets, this paper improves the target frame positioning loss function of the YOLOv5 algorithm, and improves the detection accuracy of the algorithm on the infrared UAV dataset. Aiming at the real-time processing requirements in actual detection tasks, this paper designs a lightweight algorithm and validates it on embedded devices. The results show that the proposed lightweight infrared UAV target detection algorithm can basically be used on embedded devices. meet real-time processing requirements.
+  
+  In summary, this paper proposes an infrared UAV target detection algorithm based on deep learning, which can achieve higher detection accuracy than existing algorithms on the infrared UAV dataset. The lightweight version of the algorithm is used in embedded devices. The above verification results show that the algorithm can basically run in real time.
 \end{eabstract}
