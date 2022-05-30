@@ -175,7 +175,7 @@ ghost 模块是一种替代传统CNN中的卷积操作并且获得更快速度�
 
 本课题的ghost实现流程如图\ref{ghost2}所示，将原始卷积层改变成两部分，分别产生相当于原始卷积层一半通道数的输出（实际上二者的输出比例可以任意调节），可以使得改进后的模块参数量减少。
 
-具体地，本文在实现ghost模块时采用的简单线性变换是分组卷积。图\ref{convp}表示了普通卷积模块的卷积过程,而图\ref{ghostp}表示本文实现的ghost模块的卷积过程。从图\ref{convp}中可以看出，普通卷积的一个卷积核对应一个输出通道，每个卷积核和所有输入通道进行运算；而在图\ref{ghostp}中，首先对输入通道$C1$应用普通卷积，产生$\frac{C2}{2}$个输出特征图，此后应用分组个数为$\frac{C2}{2}$的分组卷积，每个分组内的卷积核不与组外的输入特征图进行运算，分组卷积再产生$\frac{C2}{2}$个输出特征图，因此可以实现ghost模块的输出特征图和普通卷积的输出特征图维度相同。
+具体地，本文在实现ghost模块时采用的简单线性变换是分组卷积。图\ref{convp}表示了普通卷积模块的卷积过程,而图\ref{ghostp}表示本文实现的ghost模块的卷积过程。从图\ref{convp}中可以看出，普通卷积的一个卷积核对应一个输出通道，每个卷积核和所有输入通道进行运算；而在图\ref{ghostp}中，首先对输入通道$C_1$应用普通卷积，产生$\frac{C_2}{2}$个输出特征图，此后应用分组个数为$\frac{C_2}{2}$的分组卷积，每个分组内的卷积核不与组外的输入特征图进行运算，分组卷积再产生$\frac{C_2}{2}$个输出特征图，因此可以实现ghost模块的输出特征图和普通卷积的输出特征图维度相同。
 \begin{figure}[htbp]
     \centering
     \includegraphics[width = 0.8\textwidth]{普通卷积过程.png}
@@ -237,6 +237,24 @@ ghost 模块是一种替代传统CNN中的卷积操作并且获得更快速度�
 
 \subsection{ghost算法实验对比分析}
 将ghost模块对应改动部署到YOLOv5网络之后，在实验平台上进行测试验证。分别用YOLOv5网络模型和调整深度之后得到的小型网络（记为YOLOv5s）作为参照，验证YOLOv5+ghost在红外无人机图像数据集上的效果。
+本章提到的算法在PC端用深度学习网络框架Pytorch进行实现、训练和测试。操作系统为Windows 10，使用的主要软件为python。实验平台采用的CPU型号为Intel Core i7-11700k，GPU型号为NVIDIA GeForce RTX 3080Ti,显存容量为12GB。训练过程中使用GPU进行加速。
+
+\begin{table}[htbp]
+    \caption{不同算法对红外无人机数据集的检测结果}
+    \vspace{0.5em}\centering\wuhao
+    \begin{tabular}{ccccc}
+    \toprule
+    检测算法 & mAP & 推理时间(ms) & 参数量 & 计算量(GFLOPs)\\
+    \midrule
+    YOLOv5 & 0.937 & 2.5 & 7.0M & 15.8\\
+    YOLOv5s & 0.901 & 1.5 & 3.6M & 8.6\\
+    Ours(YOLOv5+ghost)& 0.915 & 1.2 & 3.7M & 8.1\\
+    \bottomrule
+    \end{tabular}
+    \label{t22}
+\end{table}
+
+从表\ref{t22}中可以看出，缩小尺寸的YOLOv5s相比于YOLOv5网络，已经在参数量和计算量上大大减少，同时推理时间也在缩短，这是因为YOLOv5s网络是对YOLOv5网络进行卷积核尺寸、个数的缩减后得出的，因而YOLOv5s网络的特征提取能力更弱，在红外无人机数据集上的检测精度也更低。而本文提出的YOLOv5+ghost算法相比YOLOv5s算法能获得更高的检测精度和更快的推理速度，在参数量和计算量上和YOLOv5s算法持平。
 
 \section{轻量化红外无人机目标检测算法嵌入式实现与验证}
 为了进一步验证本文提出的轻量化红外无人机目标检测算法的有效性，本节将本文提出的完整算法模型进行转换，并且在嵌入式设备上进行检测和验证。
@@ -246,20 +264,18 @@ ghost 模块是一种替代传统CNN中的卷积操作并且获得更快速度�
 Jetson AGX Xavier 上进行算法测试，验证算法在实际使用中是否能达到实时性要求。
 NVIDIA Jetson AGX Xavier 开发板是英伟达公司推出的嵌入式 AI 超级计算平台，可以
 部署在无人机或机器人等诸多终端上，解决移动终端算力不足的局限。NVIDIA
-Jetson TX2 采用 Tegra 处理器，内存为 8GB，采用了全新 Pascal 架构 GPU 核心，
+NVIDIA Jetson AGX Xavier 采用 ARM v8.2 处理器，内存为 32GB，采用了全新 Volta 架构 GPU 核心，
 更加适合进行一些基于深度学习的计算机视觉任务的开发，具体参数如表\ref{t1}中所
 示。NVIDIA Jetson AGX Xavier 具有 MAX Q 和 MAX P 两种运行模式，由于其体型小巧，
 性能高效，因此应用场景广泛，如无人机和智能机器人等相关的智能机器领域，
 安防和智慧城市等领域。NVIDIA Jetson AGX Xavier 平台出厂自带 Ubuntu 16.04 操作系
-统，支持 NVIDIA Jetpack SDK，包括深度学习库、计算机视觉、GPU 计算等功
-能，支持下载安装所有台式机所能安装的软件如 Python、Pytorch、TensorFlow
-等，轻松配置台式机一样的运行环境。NVIDIA Jetson AGX Xavier 有非常多功能的接口，
+统，NVIDIA Jetson AGX Xavier 有非常多功能的接口，
 比如可以使用 HDMI 接口连接显示器，使用 USB3.0 接口连接摄像头进行实时获
 取视频数据用来进行检测或跟踪任务。NVIDIA Jetson AGX Xavier 嵌入式开发平台如图
-\ref{agx}所示。近年来由于 TX2 嵌入式平台外形小巧便于集成到各种终端产品中，嵌
+\ref{agx}所示。近年来由于 NVIDIA Jetson AGX Xavier 嵌入式平台外形小巧便于集成到各种终端产品中，嵌
 入式智能计算平台发展迅猛，但经过实际测试表明嵌入式设备因为 CPU 和 GPU
-计算能力与台式机相比仍具有一定差距，TX2 与台式机在相同参数情况下进行相
-同的实验时，二者 GPU 运算效率相差将近 10 倍。由于人工智能的兴起，未来嵌
+计算能力与台式机相比仍具有一定差距，NVIDIA Jetson AGX Xavier 与台式机在相同参数情况下进行相
+同的实验时，二者 GPU 运算效率相差几倍。由于人工智能的兴起，未来嵌
 入式设备会向着更加小型化、功耗更低、运行速度更快的方向发展。
 
 \begin{figure}[htbp]
@@ -307,11 +323,20 @@ Jetson TX2 采用 Tegra 处理器，内存为 8GB，采用了全新 Pascal 架�
 
 开放式神经网络交换（ONNX）是迈向开放式生态系统的第一步，它使AI开发人员能够随着项目的发展选择合适的工具。 ONNX为AI模型提供开源格式。 它定义了可扩展的计算图模型，以及内置运算符和标准数据类型的定义。 最初的ONNX专注于推理（评估）所需的功能。 ONNX解释计算图的可移植，它使用graph的序列化格式。 它不一定是框架选择在内部使用和操作计算的形式。 例如，如果在优化过程中操作更有效，则实现可以在存储器中以不同方式表示模型。
 
-\subsection{tensorrt框架}
+\subsection{TensorRT框架}
 TensorRT 是 NVIDIA 推出的一个高性能的深度学习推理框架，可以让深度学习模型在 NVIDIA GPU 上实现低延迟，高吞吐量的部署。TensorRT 支持 Caffe，TensorFlow，Mxnet，Pytorch 等主流深度学习框架。TensorRT 是一个 C++ 库，并且提供了 C++ API 和 Python API，主要在 NVIDIA GPU 进行高性能的推理 (Inference) 加速。
 
 \subsection{嵌入式平台算法实现及分析}
-本节将第三章中研究的基于深度学习的红外无人机目标检测算法进行转换后的算法模型在 NVIDIA AGX XAVIER平台上进行推理测试。算法在嵌入式平台上的检测效果如图\ref{}所示。经过测试，本文提出的算法经过轻量化后在NVIDIA AGX XAVIER平台上的推理时间为36ms，运行速度为28FPS，在保证精度较高的前提下，基本满足实时检测的要求。
+借助ONNX框架和TensorRT框架，本文实现了轻量化红外无人机目标检测的engine格式模型，以使得第三章中研究的基于深度学习的红外无人机目标检测算法进行转换后的算法模型在 NVIDIA AGX XAVIER平台上进行推理测试。
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width = 0.5\textwidth]{agx结果.jpg}
+    \caption{嵌入式设备检测结果图}
+    \label{agxo}
+\end{figure}
+
+算法在嵌入式平台上的检测效果如图\ref{agxo}所示。经过测试，本文提出的算法经过轻量化后在NVIDIA AGX XAVIER平台上的推理时间为36ms，运行速度为28FPS，在保证精度较高的前提下，基本满足实时检测的要求。
 
 \section{本章小结}
 本章目的在于将无人机目标检测算法移植到嵌入式平台NVIDIA AGX XAVIER上实现实时检
