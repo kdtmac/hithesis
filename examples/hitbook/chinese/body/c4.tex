@@ -105,7 +105,7 @@ MobileNet模型基于深度可分离卷积搭建，这是分解卷积的一种�
 
 设标准卷积层的输入维度为$D_{F} \times D_{F} \times M$，输出特征图维度为$D_{F} \times D_{F} \times N$，其中$D_{F}$表示一个正方形输入特征图的宽和高，$M$表示输入通道数，$D_{G}$指的是正方形输出特征图的宽和高，$N$表示输出通道数。设标准卷积核大小为$D_{K} \times D_{K} \times M \times N$，其中$D_{F}$是卷积核的空间维度，$M$表示输入通道数，$N$表示输出通道数，则标准卷积的计算消耗为
 \begin{equation}
-    D_{K} \cdot D_{K} \cdot M \cdot N \cdot D_{F} \cdot D_{F}
+    D_{K} \times D_{K} \times M \times N \times D_{F} \times D_{F}
 \end{equation}
 
 其中计算成本乘法取决于输入通道的数量$M$、输出通道的数量$N$、内核大小$D_{K} \times D_{K}$和特征图大小$D_{F} \times D_{F}$。MobileNet模型使用深度可分离卷积来打破输出通道数量和内核大小之间的相互作用。
@@ -113,7 +113,7 @@ MobileNet模型基于深度可分离卷积搭建，这是分解卷积的一种�
 
 深度可分离卷积由两部分组成：深度卷积和逐点卷积。我们使用深度卷积来针对每个通道使用一个卷积核。逐点卷积通过使用$1\times1$卷积来针对深度卷积的输出实现线性变换。MobileNet在两个层中都使用了BN和ReLU。深度卷积的计算成本为：
 \begin{equation}
-    D_{K} \cdot D_{K} \cdot M \cdot D_{F} \cdot D_{F}
+    D_{K} \times D_{K} \times M \times D_{F} \times D_{F}
 \end{equation}
 
 相对于标准卷积，深度卷积是非常有效的。但是它只过滤输入通道，不聚合它们形成新的特征。所以提供针对深度卷积的输出实现线性变换的额外层，即$1\times1$卷积层用于生成新特征。
@@ -121,14 +121,14 @@ MobileNet模型基于深度可分离卷积搭建，这是分解卷积的一种�
 深度卷积和$1\times1$卷积（逐点卷积）的联合称为深度可分离卷积。
 深度可分离卷积的计算成本为：
 \begin{equation}
-    D_{K} \cdot D_{K} \cdot M \cdot D_{F} \cdot D_{F}+M \cdot N \cdot D_{F} \cdot D_{F}
+    D_{K} \times D_{K} \times M \times D_{F} \times D_{F}+M \times N \times D_{F} \times D_{F}
 \end{equation}
 
 是深度卷积和逐点卷积的操作和。
 
 通过将卷积表示为过滤和组合两步过程，可以得到计算量的减少比例：
 \begin{equation}
-    \frac{D_{K} \cdot D_{K} \cdot M \cdot D_{F} \cdot D_{F}+M \cdot N \cdot D_{F} \cdot D_{F}}{D_{K} \cdot D_{K} \cdot M \cdot N \cdot D_{F} \cdot D_{F}}=\frac{1}{N}+\frac{1}{D_{K}^{2}}
+    \frac{D_{K} \times D_{K} \times M \times D_{F} \times D_{F}+M \times N \times D_{F} \times D_{F}}{D_{K} \times D_{K} \times M \times N \times D_{F} \times D_{F}}=\frac{1}{N}+\frac{1}{D_{K}^{2}}
 \end{equation}
 
 MobileNet通过使用$3\times3$的深度可分离卷积，相对于标准卷积而言计算量减少了8-9倍。
@@ -216,8 +216,8 @@ ghost 模块是一种替代传统CNN中的卷积操作并且获得更快速度�
 
 \begin{equation}
     \begin{aligned}
-    r_{s} &=\frac{n \cdot h^{\prime} \cdot w^{\prime} \cdot c \cdot k \cdot k}{\frac{n}{s} \cdot h^{\prime} \cdot w^{\prime} \cdot c \cdot k \cdot k+(s-1) \cdot \frac{n}{s} \cdot h^{\prime} \cdot w^{\prime} \cdot d \cdot d} \\
-    &=\frac{c \cdot k \cdot k}{\frac{1}{s} \cdot c \cdot k \cdot k+\frac{s-1}{s} \cdot d \cdot d} \approx \frac{s \cdot c}{s+c-1} \approx S
+    r_{s} &=\frac{n \times h^{\prime} \times w^{\prime} \times c \times k \times k}{\frac{n}{s} \times h^{\prime} \times w^{\prime} \times c \times k \times k+(s-1) \times \frac{n}{s} \times h^{\prime} \times w^{\prime} \times d \times d} \\
+    &=\frac{c \times k \times k}{\frac{1}{s} \times c \times k \times k+\frac{s-1}{s} \times d \times d} \approx \frac{s \times c}{s+c-1} \approx S
     \end{aligned}
     \label{jsb}
 \end{equation}
@@ -229,7 +229,7 @@ ghost 模块是一种替代传统CNN中的卷积操作并且获得更快速度�
 （1）相对于普通卷积模块的参数压缩比
 
 \begin{equation}
-    r_{c}=\frac{n \cdot c \cdot k \cdot k}{\frac{n}{s} \cdot c \cdot k \cdot k+(s-1) \cdot \frac{n}{s} \cdot d \cdot d} \approx \frac{s \cdot c}{s+c-1} \approx \frac{s c}{c}=S
+    r_{c}=\frac{n \times c \times k \times k}{\frac{n}{s} \times c \times k \times k+(s-1) \times \frac{n}{s} \times d \times d} \approx \frac{s \times c}{s+c-1} \approx \frac{s c}{c}=S
     \label{csys}
 \end{equation}
 

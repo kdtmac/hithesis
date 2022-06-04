@@ -65,9 +65,10 @@ $3\times3$，卷积操作从图像左上角开始，即$(0,0)$坐标，本次卷
 激活函数的初衷是模拟了生物神经元特性，解决之前简单线性加权难以解决的非
 线性信号拟合问题。常用的激活函数如下：
 
-（1）Sigmoid 函数：也称 Logistic 函数，该函数的数学定义式为 2.3 所示，
+（1）Sigmoid 函数：也称 Logistic 函数，该函数的数学定义式为\ref{log}所示，
 \begin{equation}
     \sigma(x)=\frac{1}{\exp (-x)+1}
+    \label{log}
 \end{equation}
 
 \begin{figure}[htbp]
@@ -99,7 +100,6 @@ Sigmoid 函数易于求导，但其存在最大的局限就是当输入较大或
 着网络深度的加深，后一个神经元的输出不断影响下一层神经元导致数据分布改
 变的问题。在实践中 Tanh 函数比 Sigmoid 函数效果更好，但仍然没有解决梯度
 消失的问题。
-
 \begin{equation}
     \sigma(x)=\tanh (x)=\frac{\exp (x)-\exp (-x)}{\exp (x)+\exp (-x)}=2 \operatorname{sigmoid}(2 x)-1
     \label{tan}
@@ -119,7 +119,6 @@ Hinton 和 Nair 提出，可以看出 ReLU 在$x\ge 0$时导数为 $1$，有效�
 现 ReLU 函数收敛速度也比 tanh 函数快 6 倍以上。但 ReLU 强行将$ x<0$的部分
 置于 0，会导致这部分神经元处于“死区”，因此不能将学习率设置的过大。后
 续研究者针对以上的问题提出了 LeakyReLU\cite{maas2013rectifier}、PReLU、RReLU 等变体。
-
 \begin{equation}
     \sigma(x)=\max (0, x)= \begin{cases}x & x \geq 0 \\ 0 & x<0\end{cases}
     \label{relu}
@@ -211,7 +210,7 @@ FPS（Frame Per Second），指的是模型每秒钟能够处理的图片数量�
 获取过程、红外图像的特性等方面进行相关概念的介绍，为后续工作开展打下理
 论基础。
 \subsection{红外成像技术}
-红外线（IR）是波长在 760nm 在 1mm 之间，波长介于可见光与微波之间的
+红外线（IR）是波长在 760nm 到 1mm 之间，波长介于可见光与微波之间的
 电磁波，自然界中任何物体只要温度在绝对零度（$-273 ^{\circ}C$）以上都会产生红外
 辐射。红外成像技术就是使用红外探测器接收物体发出的红外辐射，最后以红外
 图像或视频等方式呈现出来。红外成像技术原理如图\ref{infra}所示\cite{倪国强2008中国红外成像技术发展的若干思考}。
