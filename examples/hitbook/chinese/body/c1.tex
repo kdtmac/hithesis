@@ -207,11 +207,11 @@ Faster R-CNN 算法的局限主要集中在以 ROI 池化层为界，网络的�
 
 Mask R-CNN 是以 Faster R-CNN 为原型，增加了一个 mask 分支
 用于实例分割任务，此网络最大的创新点在于 ROI Align 的提出，解决了目标映
-射到 feature map 上可能会出现坐标不是整数问题。ROI pooling 层需要输出固定
+射到 feature map 上可能会出现坐标不是整数问题。ROI 池化 层需要输出固定
 大小的 feature map 而进行等比例缩放过程中引入了量化误差，虽然量化只是去
 掉了小数部分，但是映射到原图上误差会成倍的增长，从而严重影响网络的定位
 准确性。在 ROI Align 中提出了双线性插值填补非整数位置的像素，使用 max 或
-average pooling 汇总结果，整个过程没有使用量化，从而获得更准确的像素信息，
+average 池化 汇总结果，整个过程没有使用量化，从而获得更准确的像素信息，
 进一步提高了检测的精度，算法框架如图\ref{maskr}所示。
 
 \begin{figure}[htbp]
