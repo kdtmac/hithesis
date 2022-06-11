@@ -51,7 +51,7 @@
 \begin{figure}[htbp]
     \centering
     \includegraphics[width = 0.6\textwidth]{传统目标检测.png}
-    \caption{传统目标检测流程}
+    \caption{传统目标检测流程示意图}
     \label{ct}
 \end{figure}
 
@@ -90,7 +90,7 @@ Adaboost算法的主要思想是，在训练过程中，被错误分类的样本
 \begin{figure}[htbp]
     \centering
     \includegraphics[width = 0.7\textwidth]{rcnn.png}
-    \caption{R-CNN算法框架}
+    \caption{R-CNN模型结构图\cite{girshick2014rich}}
     \label{rcnn}
 \end{figure}
 
@@ -146,17 +146,17 @@ Fast R-CNN算法仍然存在问题。该算法的局限性主要是仍然没有�
 \begin{figure}[htbp]
     \centering
     \includegraphics[width = 0.9\textwidth]{fastr.png}
-    \caption{Fast R-CNN算法框架}
+    \caption{Fast R-CNN算法模型结构图\cite{girshick2015fast}}
     \label{fastr}
 \end{figure}
 
 2016 年，Ren 等人针对 R-CNN系列算法的候选区域算法普遍存在的候选区域提取速度的问题，研究并提出了 Faster R-CNN 算法
-\cite{ren2015faster}，Faster R-CNN 算法的主要框架如图\ref{fasterr}所示。
+\cite{ren2015faster}，Faster R-CNN 算法的主要网络结构如图\ref{fasterr}所示。
 
 \begin{figure}[htbp]
     \centering
     \includegraphics[width = 0.7\textwidth]{fasterr.png}
-    \caption{Faster R-CNN算法框架}
+    \caption{Faster R-CNN网络结构图\cite{ren2015faster}}
     \label{fasterr}
 \end{figure}
 
@@ -196,7 +196,7 @@ Faster R-CNN 算法的局限主要集中在以 ROI 池化层为界，网络的�
 \begin{figure}[htbp]
     \centering
     \includegraphics[width = 0.9\textwidth]{rfcn.png}
-    \caption{R-FCN算法框架}
+    \caption{R-FCN算法框架结构图\cite{dai2016r}}
     \label{rfcn}
 \end{figure}
 在Faster R-CNN的基础上，Mask R-CNN添加了一个预测目标掩模的并行分支，称为mask分支，该分支的主要作用是为每个目标实例产生高质量的分割掩模，从而与原本的Faster R-CNN并行地进行目标检测和目标实例分割任务。Mask R-CNN是一个简单的、易于训练的网络，相对于Faster R-CNN只增加了少量的运算，能够以5 fps的速度运行。此外，Mask R-CNN能够较好地扩展到人体姿态估计等其他任务上。在COCO的3个挑战任务（实例分割、目标检测、人体关键点检测）中，Mask R-CNN都取得了当时的最好成绩。该算法主要的创新在于提出了ROI Align算法。该算法主要研究了目标检测中特征图上可能出现的目标的定位不是整数的问题。在ROI池化层中需要对特征图进行一定程度的缩放，该过程容易引入量化误差，虽然量化本身产生的误差较小，但是这个误差按比例映射到原图上就会被放大，从而影响算法对目标定位的精度。ROI Align算法就是用一种双线性插值的方法补充这些位置的像素点，用最大池化或者平均池化的方法取代量化，从而规避量化误差，提高算法模型对目标的定位能力，算法框架如图\ref{maskr}所示。
@@ -204,7 +204,7 @@ Faster R-CNN 算法的局限主要集中在以 ROI 池化层为界，网络的�
 \begin{figure}[htbp]
     \centering
     \includegraphics[width = 0.9\textwidth]{maskr.png}
-    \caption{Mask R-CNN算法框架}
+    \caption{Mask R-CNN网络结构图\cite{he2017mask}}
     \label{maskr}
 \end{figure}
 
@@ -217,7 +217,7 @@ YOLO算法能够直接在输出层对目标进行位置和所属类型的回归�
 \begin{figure}[htbp]
     \centering
     \includegraphics[width = 0.9\textwidth]{yolo框架.png}
-    \caption{YOLO算法框架}
+    \caption{YOLO算法网络结构\cite{redmon2016you}}
     \label{yk}
 \end{figure}
 
@@ -278,12 +278,12 @@ YOLOv3算法的主要改进是：
 
 （2）引入了dropblock方法\cite{ghiasi2018dropblock}来缓解过拟合问题。和传统的dropout方法不同的是，dropout是随机丢弃某些神经元来使网络结构变得简单，而dropblock的处理方法是对某个局部区域进行删减。
 
-在YOLO系列研究人员不断提出更好性能的目标检测算法的同时，另外一个研究提升单阶段目标检测算法性能的一个分支是 SSD 系列， 2016 年 Liu W 等人通过分析借鉴 YOLO 的回归思想，在此基础上融合了 Faster R-CNN 的 anchor 机制，力求将YOLO的快速和Faster R-CNN的精度高这两个特点结合起来，对不同尺度的特征图和不同大小的目标进行检测和将结果进行筛选和合并。从YOLO和SSD各自的网络结构可以看出，SSD算法选择将不同网络层输出的各个特征图都进行目标位置和类型的训练和预测，以此来实现对各种尺寸目标的检测。而YOLO算法中仅仅在最后一层进行目标的训练和检测，而经过网络若干的池化层后，最后一层特征图的尺寸将会大大缩小，对应原图像中的区域就会很大，因此YOLO对小目标的检测能力较弱。SSD和YOLO的这一处理方法的不同，导致SSD对小目标的检测精度明显高于YOLO算法。SSD的算法框架如图\ref{ssd}所示。
+在YOLO系列研究人员不断提出更好性能的目标检测算法的同时，另外一个研究提升单阶段目标检测算法性能的一个分支是 SSD 系列， 2016 年 Liu W 等人通过分析借鉴 YOLO 的回归思想，在此基础上融合了 Faster R-CNN 的 anchor 机制，力求将YOLO的快速和Faster R-CNN的精度高这两个特点结合起来，对不同尺度的特征图和不同大小的目标进行检测和将结果进行筛选和合并。从YOLO和SSD各自的网络结构可以看出，SSD算法选择将不同网络层输出的各个特征图都进行目标位置和类型的训练和预测，以此来实现对各种尺寸目标的检测。而YOLO算法中仅仅在最后一层进行目标的训练和检测，而经过网络若干的池化层后，最后一层特征图的尺寸将会大大缩小，对应原图像中的区域就会很大，因此YOLO对小目标的检测能力较弱。SSD和YOLO的这一处理方法的不同，导致SSD对小目标的检测精度明显高于YOLO算法。SSD的算法网络结构如图\ref{ssd}所示。
 
 \begin{figure}[htbp]
     \centering
     \includegraphics[width = 0.9\textwidth]{ssd.png}
-    \caption{SSD算法框架}
+    \caption{SSD算法网络结构}
     \label{ssd}
 \end{figure}
 
