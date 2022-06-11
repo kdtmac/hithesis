@@ -160,7 +160,7 @@ Prediction部分包含上级输出的特征向量，并通过输入的特征向�
 \subsection{YOLOv5基础网络性能验证与分析}
 本节将在自建数据集上对YOLOv5基础网络的性能进行验证，将其与常见算法SSD和Faster R-CNN进行对比，并分析YOLOv5算法的优势。
 为了证明基础YOLOv5算法在红外无人机目标检测任务中的有效性，本节将其与目标检测算法SSD以及Faster R-CNN进行对比实验。
-本章提到的YOLOv5基础算法用深度学习网络框架Pytorch进行实现、训练和测试。操作系统为Windows 10，使用的主要软件为python。实验平台采用的CPU型号为Intel Core i7-11700k，GPU型号为NVIDIA GeForce RTX 3080Ti,显存容量为12GB。训练过程中使用GPU进行加速。
+本章提到的算法用Pytorch框架进行网络部署和测试。操作系统为Windows 10，算法实现依赖的软件环境为python。实验采用的服务器CPU型号为Intel Core i7-11700k，GPU型号为NVIDIA GeForce RTX 3080Ti,GPU搭载的显存容量为12GB。
 
 
 
@@ -402,7 +402,7 @@ $GIoU$是经过改进的$IoU$计算方法，有如下几个特点：
 
 
 \subsection{实验环境与参数}
-本章提到的算法用深度学习网络框架Pytorch进行实现、训练和测试。操作系统为Windows 10，使用的主要软件为python。实验平台采用的CPU型号为Intel Core i7-11700k，GPU型号为NVIDIA GeForce RTX 3080Ti,显存容量为12GB。训练过程中使用GPU进行加速。
+本章提到的算法用Pytorch框架进行网络部署和测试。操作系统为Windows 10，算法实现依赖的软件环境为python。实验采用的服务器CPU型号为Intel Core i7-11700k，GPU型号为NVIDIA GeForce RTX 3080Ti,GPU搭载的显存容量为12GB。
 
 \subsection{不同算法对比与分析}
 在上述环境下，进行算法的训练和测试，以mAP和推理时间作为评价指标，对比结果列在表\ref{m1}中。
